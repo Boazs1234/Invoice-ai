@@ -1,22 +1,22 @@
-import { pgTable, text, serial, numeric, timestamp, date, integer } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 
-export const invoices = pgTable("invoices", {
-  id: serial("id").primaryKey(),
+export const invoices = sqliteTable("invoices", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").references(() => users.id),
   invoiceNumber: text("invoice_number").notNull(),
-  invoiceDate: date("invoice_date").notNull(),
-  paymentDueDate: date("payment_due_date"),
+  invoiceDate: text("invoice_date").notNull(),
+  paymentDueDate: text("payment_due_date"),
   
   logoUrl: text("logo_url"),
   
@@ -37,17 +37,17 @@ export const invoices = pgTable("invoices", {
   editionNumber: text("edition_number"),
   artworkImageUrl: text("artwork_image_url"),
   
-  price: numeric("price").notNull(),
-  taxRate: numeric("tax_rate").default("0"),
-  taxAmount: numeric("tax_amount").default("0"),
-  shippingFees: numeric("shipping_fees").default("0"),
-  totalAmount: numeric("total_amount").notNull(),
+  price: text("price").notNull(),
+  taxRate: text("tax_rate").default("0"),
+  taxAmount: text("tax_amount").default("0"),
+  shippingFees: text("shipping_fees").default("0"),
+  totalAmount: text("total_amount").notNull(),
   currency: text("currency").default("USD").notNull(),
   
   paymentTerms: text("payment_terms"),
   notes: text("notes"),
   
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({ 

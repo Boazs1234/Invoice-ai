@@ -1,7 +1,7 @@
-import type { Express, Request, Response, NextFunction } from "express";
+import type { Express } from "express";
 import type { Server } from "http";
 import session from "express-session";
-import connectPgSimple from "connect-pg-simple";
+import createMemoryStore from "memorystore";
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { api, registerSchema, loginSchema } from "@shared/routes";
@@ -9,7 +9,6 @@ import { z } from "zod";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { pool } from "./db";
 
 declare module "express-session" {
   interface SessionData {
@@ -23,10 +22,10 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 const fileStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (_req, _file, cb) => {
     cb(null, uploadDir);
   },
-  filename: (req, file, cb) => {
+  filename: (_req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
   },
@@ -35,7 +34,7 @@ const fileStorage = multer.diskStorage({
 const upload = multer({
   storage: fileStorage,
   limits: { fileSize: 10 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (_req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
@@ -51,14 +50,12 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  const PgSession = connectPgSimple(session);
+  const MemoryStore = createMemoryStore(session);
   
   app.use(
     session({
-      store: new PgSession({
-        pool: pool,
-        tableName: "session",
-        createTableIfMissing: true,
+      store: new MemoryStore({
+        checkPeriod: 86400000, // prune expired entries every 24h
       }),
       secret: process.env.SESSION_SECRET || "dev-secret-change-in-production",
       resave: false,

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl } from "@shared/routes";
-import type { InsertInvoice, Invoice } from "@shared/schema";
+import type { InsertInvoice } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
 export function useInvoices() {

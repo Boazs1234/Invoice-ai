@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateInvoice, useUpdateInvoice } from "@/hooks/use-invoices";
 import { useEffect, useState, useCallback } from "react";
-import { Loader2, Upload, X, Image as ImageIcon } from "lucide-react";
+import { Loader2, X, Image as ImageIcon } from "lucide-react";
 import { z } from "zod";
 
 const formSchema = insertInvoiceSchema.extend({
